@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { X, LayoutDashboard, Settings, Briefcase, Users, ClipboardList, Search, UserSearch, KanbanSquare } from 'lucide-react';
 
 const NAV = [
@@ -23,18 +23,18 @@ export default function Sidebar({ open, onClose }: Props) {
       className={`
         fixed lg:sticky top-0 left-0 z-40 h-screen lg:h-screen
         w-64 lg:w-56 flex-shrink-0
-        bg-gray-900 text-white flex flex-col
+        bg-blue-100 text-gray-800 flex flex-col
         transition-transform duration-200 ease-in-out
         ${open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}
     >
-      <div className="flex items-center justify-between px-5 py-5 border-b border-gray-700">
+      <div className="flex items-center justify-between px-5 py-5 border-b border-blue-200">
         <div>
-          <h1 className="text-lg font-bold tracking-tight">HR Tracker</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Hiring Intelligence</p>
+          <h1 className="text-lg font-bold tracking-tight text-blue-900">HR Tracker</h1>
+          <p className="text-xs text-blue-500 mt-0.5">Hiring Intelligence</p>
         </div>
         <button
-          className="lg:hidden p-1.5 rounded-lg hover:bg-gray-700 transition-colors"
+          className="lg:hidden p-1.5 rounded-lg hover:bg-blue-200 transition-colors text-blue-700"
           onClick={onClose}
           aria-label="Close menu"
         >
@@ -52,8 +52,8 @@ export default function Sidebar({ open, onClose }: Props) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 isActive
-                  ? 'bg-blue-600 text-white font-medium'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  ? 'bg-blue-600 text-white font-medium shadow-sm'
+                  : 'text-blue-800 hover:bg-blue-200 hover:text-blue-900'
               }`
             }
           >
@@ -63,7 +63,7 @@ export default function Sidebar({ open, onClose }: Props) {
         ))}
       </nav>
 
-      <div className="px-4 py-4 border-t border-gray-700 text-xs text-gray-500">
+      <div className="px-4 py-4 border-t border-blue-200 text-xs text-blue-400">
         © 2024 HR Tracker
       </div>
     </aside>
