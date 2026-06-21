@@ -35,7 +35,7 @@ function ScoreDots({ score }: { score?: number }) {
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map(n => (
-        <div key={n} className={`w-3 h-3 rounded-full ${(score ?? 0) >= n ? 'bg-blue-500' : 'bg-gray-200'}`} />
+        <div key={n} className={`w-2.5 h-2.5 rounded-full ${(score ?? 0) >= n ? 'bg-blue-500' : 'bg-gray-200'}`} />
       ))}
     </div>
   );
@@ -56,11 +56,11 @@ function AssessmentForm({ initial, jobs, applicants, stages, members, onSave, on
   const set = (k: keyof Assessment, v: string | number) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4">
-        <h3 className="font-semibold text-lg">{initial?.id ? 'Edit Assessment' : 'Log Assessment'}</h3>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
+    <div className="modal-overlay">
+      <div className="modal-panel">
+        <h3 className="font-semibold text-lg mb-4">{initial?.id ? 'Edit Assessment' : 'Log Assessment'}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="sm:col-span-2">
             <label className="label">Candidate</label>
             <select className="select" value={form.candidate_id ?? ''} onChange={e => set('candidate_id', e.target.value)}>
               <option value="">— Select —</option>
@@ -71,7 +71,7 @@ function AssessmentForm({ initial, jobs, applicants, stages, members, onSave, on
               ))}
             </select>
           </div>
-          <div>
+          <div className="sm:col-span-2">
             <label className="label">Job Opening</label>
             <select className="select" value={form.job_id ?? ''} onChange={e => set('job_id', parseInt(e.target.value))}>
               <option value="">— Select —</option>
@@ -97,7 +97,7 @@ function AssessmentForm({ initial, jobs, applicants, stages, members, onSave, on
             </select>
           </div>
           <div>
-            <label className="label">Score (1-5)</label>
+            <label className="label">Score (1–5)</label>
             <input className="input" type="number" min={1} max={5} value={form.score ?? ''}
               onChange={e => set('score', parseInt(e.target.value))} />
           </div>
@@ -107,19 +107,19 @@ function AssessmentForm({ initial, jobs, applicants, stages, members, onSave, on
               {STATUS_OPTS.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <label className="label">Feedback / Notes</label>
             <textarea className="input resize-none" rows={3} value={form.feedback ?? ''}
               onChange={e => set('feedback', e.target.value)} />
           </div>
         </div>
         {form.current_stage && (
-          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-lg text-sm text-amber-800">
-            <Zap size={14} />
+          <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-lg text-sm text-amber-800 mt-3">
+            <Zap size={14} className="flex-shrink-0" />
             <span>Next action: <strong>{deriveNextAction(form.current_stage, form.status ?? 'Active')}</strong></span>
           </div>
         )}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-4">
           <button className="btn-primary"
             onClick={() => form.candidate_id && form.job_id && onSave(form)}>
             Save
@@ -172,64 +172,102 @@ export default function AssessmentTracker() {
   });
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Assessment Tracker</h2>
-          <p className="text-sm text-gray-500 mt-1">{assessments.length} assessments logged</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Assessment Tracker</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{assessments.length} assessments logged</p>
         </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => setEditing({})}>
-          <Plus size={16} /> Log Assessment
+        <button className="btn-primary flex items-center gap-1.5" onClick={() => setEditing({})}>
+          <Plus size={16} /><span className="hidden sm:inline">Log Assessment</span><span className="sm:hidden">Log</span>
         </button>
       </div>
 
-      <input className="input max-w-sm" placeholder="Filter by candidate, job, stage…"
+      <input className="input w-full sm:max-w-sm" placeholder="Filter by candidate, job, stage…"
         value={filter} onChange={e => setFilter(e.target.value)} />
 
-      <div className="card p-0 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              {['Candidate', 'Job', 'Stage', 'Date', 'Interviewer', 'Score', 'Status', 'Action', ''].map(h => (
-                <th key={h} className="table-th">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filtered.length === 0 && (
-              <tr><td colSpan={9} className="table-td text-center text-gray-400 py-8">No assessments found.</td></tr>
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 && (
+          <p className="text-gray-400 text-sm text-center py-8">No assessments found.</p>
+        )}
+        {filtered.map(a => (
+          <div key={a.id} className="mobile-card">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="font-semibold text-gray-900">{a.first_name} {a.last_name}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{a.job_title ?? '—'}</p>
+              </div>
+              <div className="flex gap-1.5 flex-shrink-0">
+                <button className="btn-icon" onClick={() => setEditing(a)}><Pencil size={14} className="text-blue-500" /></button>
+                <button className="btn-icon" onClick={() => handleDelete(a.id)}><Trash2 size={14} className="text-red-400" /></button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {a.current_stage && <span className="badge bg-indigo-100 text-indigo-700">{a.current_stage}</span>}
+              {statusBadge(a.status)}
+            </div>
+            <div className="flex items-center gap-3">
+              <ScoreDots score={a.score} />
+              {a.stage_date && <span className="text-xs text-gray-400">{a.stage_date}</span>}
+            </div>
+            {a.current_stage && (
+              <div className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 px-2 py-1.5 rounded-lg">
+                <Zap size={11} className="flex-shrink-0" />
+                {deriveNextAction(a.current_stage, a.status)}
+              </div>
             )}
-            {filtered.map(a => (
-              <tr key={a.id} className="hover:bg-gray-50">
-                <td className="table-td font-medium">{a.first_name} {a.last_name}</td>
-                <td className="table-td text-gray-500 text-xs">{a.job_title ?? '—'}</td>
-                <td className="table-td">
-                  {a.current_stage
-                    ? <span className="badge bg-indigo-100 text-indigo-700">{a.current_stage}</span>
-                    : '—'}
-                </td>
-                <td className="table-td text-gray-500 text-xs">{a.stage_date ?? '—'}</td>
-                <td className="table-td text-gray-500">{a.interviewer ?? '—'}</td>
-                <td className="table-td"><ScoreDots score={a.score} /></td>
-                <td className="table-td">{statusBadge(a.status)}</td>
-                <td className="table-td">
-                  {a.current_stage && (
-                    <span className="flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded">
-                      <Zap size={11} />
-                      {deriveNextAction(a.current_stage, a.status)}
-                    </span>
-                  )}
-                </td>
-                <td className="table-td">
-                  <div className="flex gap-2">
-                    <button className="text-blue-500 hover:text-blue-700" onClick={() => setEditing(a)}><Pencil size={14} /></button>
-                    <button className="text-red-400 hover:text-red-600" onClick={() => handleDelete(a.id)}><Trash2 size={14} /></button>
-                  </div>
-                </td>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/tablet table */}
+      <div className="hidden md:block card p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                {['Candidate', 'Job', 'Stage', 'Date', 'Interviewer', 'Score', 'Status', 'Next Action', ''].map(h => (
+                  <th key={h} className="table-th">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.length === 0 && (
+                <tr><td colSpan={9} className="table-td text-center text-gray-400 py-8">No assessments found.</td></tr>
+              )}
+              {filtered.map(a => (
+                <tr key={a.id} className="hover:bg-gray-50">
+                  <td className="table-td font-medium whitespace-nowrap">{a.first_name} {a.last_name}</td>
+                  <td className="table-td text-gray-500 text-xs max-w-[140px] truncate">{a.job_title ?? '—'}</td>
+                  <td className="table-td">
+                    {a.current_stage
+                      ? <span className="badge bg-indigo-100 text-indigo-700">{a.current_stage}</span>
+                      : '—'}
+                  </td>
+                  <td className="table-td text-gray-500 text-xs whitespace-nowrap">{a.stage_date ?? '—'}</td>
+                  <td className="table-td text-gray-500 whitespace-nowrap">{a.interviewer ?? '—'}</td>
+                  <td className="table-td"><ScoreDots score={a.score} /></td>
+                  <td className="table-td">{statusBadge(a.status)}</td>
+                  <td className="table-td">
+                    {a.current_stage && (
+                      <span className="flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded whitespace-nowrap">
+                        <Zap size={11} />
+                        {deriveNextAction(a.current_stage, a.status)}
+                      </span>
+                    )}
+                  </td>
+                  <td className="table-td">
+                    <div className="flex gap-2">
+                      <button className="text-blue-500 hover:text-blue-700" onClick={() => setEditing(a)}><Pencil size={14} /></button>
+                      <button className="text-red-400 hover:text-red-600" onClick={() => handleDelete(a.id)}><Trash2 size={14} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {editing !== null && (

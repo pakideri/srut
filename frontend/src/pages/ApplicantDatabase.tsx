@@ -21,13 +21,13 @@ function ApplicantForm({ initial, sources, onSave, onCancel }: FormProps) {
   const set = (k: keyof Applicant, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-xl p-6 space-y-4">
-        <h3 className="font-semibold text-lg">{initial?.id ? 'Edit Applicant' : 'New Applicant'}</h3>
-        <div className="grid grid-cols-2 gap-3">
+    <div className="modal-overlay">
+      <div className="modal-panel">
+        <h3 className="font-semibold text-lg mb-4">{initial?.id ? 'Edit Applicant' : 'New Applicant'}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="label">Candidate ID</label>
-            <input className="input bg-gray-50" value={form.candidate_id ?? ''} readOnly />
+            <input className="input bg-gray-50 text-sm" value={form.candidate_id ?? ''} readOnly />
           </div>
           <div>
             <label className="label">Source</label>
@@ -60,12 +60,12 @@ function ApplicantForm({ initial, sources, onSave, onCancel }: FormProps) {
             <label className="label">Resume URL</label>
             <input className="input" value={form.resume_url ?? ''} onChange={e => set('resume_url', e.target.value)} />
           </div>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <label className="label">Notes</label>
             <textarea className="input resize-none" rows={2} value={form.notes ?? ''} onChange={e => set('notes', e.target.value)} />
           </div>
         </div>
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-4">
           <button className="btn-primary"
             onClick={() => form.first_name && form.last_name && onSave(form)}>
             Save
@@ -110,62 +110,105 @@ export default function ApplicantDatabase() {
   });
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Applicant Database</h2>
-          <p className="text-sm text-gray-500 mt-1">{applicants.length} candidates</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Applicant Database</h2>
+          <p className="text-sm text-gray-500 mt-0.5">{applicants.length} candidates</p>
         </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => setEditing({})}>
-          <Plus size={16} /> New Applicant
+        <button className="btn-primary flex items-center gap-1.5" onClick={() => setEditing({})}>
+          <Plus size={16} /><span className="hidden sm:inline">New Applicant</span><span className="sm:hidden">New</span>
         </button>
       </div>
 
-      <input className="input max-w-sm" placeholder="Search by name, ID, or email…"
+      <input className="input w-full sm:max-w-sm" placeholder="Search by name, ID, or email…"
         value={filter} onChange={e => setFilter(e.target.value)} />
 
-      <div className="card p-0 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              {['ID', 'Name', 'Email', 'Phone', 'Source', 'LinkedIn', 'Resume', ''].map(h => (
-                <th key={h} className="table-th">{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {filtered.length === 0 && (
-              <tr><td colSpan={8} className="table-td text-center text-gray-400 py-8">No applicants found.</td></tr>
-            )}
-            {filtered.map(a => (
-              <tr key={a.id} className="hover:bg-gray-50">
-                <td className="table-td font-mono text-xs text-gray-500">{a.candidate_id}</td>
-                <td className="table-td font-medium">{a.first_name} {a.last_name}</td>
-                <td className="table-td text-gray-500">{a.email ?? '—'}</td>
-                <td className="table-td text-gray-500">{a.phone ?? '—'}</td>
-                <td className="table-td">
-                  {a.source ? <span className="badge bg-blue-100 text-blue-700">{a.source}</span> : '—'}
-                </td>
-                <td className="table-td">
-                  {a.linkedin_url
-                    ? <a href={a.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1"><ExternalLink size={13} /> Profile</a>
-                    : '—'}
-                </td>
-                <td className="table-td">
-                  {a.resume_url
-                    ? <a href={a.resume_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1"><ExternalLink size={13} /> Resume</a>
-                    : '—'}
-                </td>
-                <td className="table-td">
-                  <div className="flex items-center gap-2">
-                    <button className="text-blue-500 hover:text-blue-700" onClick={() => setEditing(a)}><Pencil size={14} /></button>
-                    <button className="text-red-400 hover:text-red-600" onClick={() => handleDelete(a.candidate_id)}><Trash2 size={14} /></button>
-                  </div>
-                </td>
+      {/* Mobile card list */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 && (
+          <p className="text-gray-400 text-sm text-center py-8">No applicants found.</p>
+        )}
+        {filtered.map(a => (
+          <div key={a.id} className="mobile-card">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="font-semibold text-gray-900">{a.first_name} {a.last_name}</p>
+                <p className="text-xs font-mono text-gray-400 mt-0.5">{a.candidate_id}</p>
+              </div>
+              <div className="flex gap-1.5 flex-shrink-0">
+                <button className="btn-icon" onClick={() => setEditing(a)}><Pencil size={14} className="text-blue-500" /></button>
+                <button className="btn-icon" onClick={() => handleDelete(a.candidate_id)}><Trash2 size={14} className="text-red-400" /></button>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+              {a.email && <span>{a.email}</span>}
+              {a.phone && <span>{a.phone}</span>}
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {a.source && <span className="badge bg-blue-100 text-blue-700">{a.source}</span>}
+              {a.linkedin_url && (
+                <a href={a.linkedin_url} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-blue-500 flex items-center gap-0.5">
+                  <ExternalLink size={11} /> LinkedIn
+                </a>
+              )}
+              {a.resume_url && (
+                <a href={a.resume_url} target="_blank" rel="noopener noreferrer"
+                  className="text-xs text-blue-500 flex items-center gap-0.5">
+                  <ExternalLink size={11} /> Resume
+                </a>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/tablet table */}
+      <div className="hidden md:block card p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                {['ID', 'Name', 'Email', 'Phone', 'Source', 'LinkedIn', 'Resume', ''].map(h => (
+                  <th key={h} className="table-th">{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.length === 0 && (
+                <tr><td colSpan={8} className="table-td text-center text-gray-400 py-8">No applicants found.</td></tr>
+              )}
+              {filtered.map(a => (
+                <tr key={a.id} className="hover:bg-gray-50">
+                  <td className="table-td font-mono text-xs text-gray-500 whitespace-nowrap">{a.candidate_id}</td>
+                  <td className="table-td font-medium whitespace-nowrap">{a.first_name} {a.last_name}</td>
+                  <td className="table-td text-gray-500">{a.email ?? '—'}</td>
+                  <td className="table-td text-gray-500 whitespace-nowrap">{a.phone ?? '—'}</td>
+                  <td className="table-td">
+                    {a.source ? <span className="badge bg-blue-100 text-blue-700">{a.source}</span> : '—'}
+                  </td>
+                  <td className="table-td">
+                    {a.linkedin_url
+                      ? <a href={a.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1"><ExternalLink size={13} /> Profile</a>
+                      : '—'}
+                  </td>
+                  <td className="table-td">
+                    {a.resume_url
+                      ? <a href={a.resume_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1"><ExternalLink size={13} /> Resume</a>
+                      : '—'}
+                  </td>
+                  <td className="table-td">
+                    <div className="flex items-center gap-2">
+                      <button className="text-blue-500 hover:text-blue-700" onClick={() => setEditing(a)}><Pencil size={14} /></button>
+                      <button className="text-red-400 hover:text-red-600" onClick={() => handleDelete(a.candidate_id)}><Trash2 size={14} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {editing !== null && (

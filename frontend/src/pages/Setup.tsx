@@ -37,16 +37,18 @@ function SimpleList({ endpoint, label }: { endpoint: string; label: string }) {
         <input className="input flex-1" placeholder={`Add ${label.toLowerCase()}…`} value={newName}
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && add()} />
-        <button className="btn-primary flex items-center gap-1" onClick={add}><Plus size={15} /> Add</button>
+        <button className="btn-primary flex items-center gap-1" onClick={add}>
+          <Plus size={15} /><span className="hidden sm:inline">Add</span>
+        </button>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="space-y-1.5 max-h-56 overflow-y-auto">
         {items.map(item => (
           <li key={item.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-            <span className="text-sm">{item.name}</span>
+            <span className="text-sm truncate mr-2">{item.name}</span>
             {item.is_system ? (
-              <Lock size={13} className="text-gray-300" aria-label="System value" />
+              <Lock size={13} className="text-gray-300 flex-shrink-0" aria-label="System value" />
             ) : (
-              <button onClick={() => remove(item.id)} className="text-red-400 hover:text-red-600">
+              <button onClick={() => remove(item.id)} className="text-red-400 hover:text-red-600 flex-shrink-0">
                 <Trash2 size={14} />
               </button>
             )}
@@ -82,17 +84,19 @@ function StageList() {
         <input className="input flex-1" placeholder="Add stage…" value={newName}
           onChange={e => setNewName(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && add()} />
-        <button className="btn-primary flex items-center gap-1" onClick={add}><Plus size={15} /> Add</button>
+        <button className="btn-primary flex items-center gap-1" onClick={add}>
+          <Plus size={15} /><span className="hidden sm:inline">Add</span>
+        </button>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="space-y-1.5 max-h-56 overflow-y-auto">
         {stages.map((s, i) => (
-          <li key={s.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-            <span className="text-xs text-gray-400 w-5">{i + 1}.</span>
-            <span className="text-sm flex-1">{s.name}</span>
+          <li key={s.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50">
+            <span className="text-xs text-gray-400 w-5 flex-shrink-0">{i + 1}.</span>
+            <span className="text-sm flex-1 truncate">{s.name}</span>
             {s.is_system ? (
-              <Lock size={13} className="text-gray-300" />
+              <Lock size={13} className="text-gray-300 flex-shrink-0" />
             ) : (
-              <button onClick={() => remove(s.id)} className="text-red-400 hover:text-red-600">
+              <button onClick={() => remove(s.id)} className="text-red-400 hover:text-red-600 flex-shrink-0">
                 <Trash2 size={14} />
               </button>
             )}
@@ -124,24 +128,24 @@ function TeamMemberList() {
 
   return (
     <Section title="Team Members / Stakeholders">
-      <div className="grid grid-cols-3 gap-2 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
         <input className="input" placeholder="Name" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
         <input className="input" placeholder="Email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
         <div className="flex gap-2">
           <select className="select flex-1" value={form.member_role} onChange={e => setForm(f => ({ ...f, member_role: e.target.value }))}>
             {['Manager', 'Recruiter', 'Interviewer', 'HR', 'Executive'].map(r => <option key={r}>{r}</option>)}
           </select>
-          <button className="btn-primary" onClick={add}><Plus size={15} /></button>
+          <button className="btn-primary flex-shrink-0" onClick={add}><Plus size={15} /></button>
         </div>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="space-y-1.5 max-h-56 overflow-y-auto">
         {members.map(m => (
-          <li key={m.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50">
-            <span className="text-sm font-medium flex-1">{m.name}</span>
-            <span className="text-xs text-gray-400">{m.email}</span>
-            <span className="badge bg-blue-100 text-blue-700">{m.member_role}</span>
-            {m.is_system ? <Lock size={13} className="text-gray-300" /> : (
-              <button onClick={() => remove(m.id)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+          <li key={m.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50">
+            <span className="text-sm font-medium flex-1 truncate">{m.name}</span>
+            <span className="text-xs text-gray-400 hidden sm:block truncate max-w-[120px]">{m.email}</span>
+            <span className="badge bg-blue-100 text-blue-700 flex-shrink-0">{m.member_role}</span>
+            {m.is_system ? <Lock size={13} className="text-gray-300 flex-shrink-0" /> : (
+              <button onClick={() => remove(m.id)} className="text-red-400 hover:text-red-600 flex-shrink-0"><Trash2 size={14} /></button>
             )}
           </li>
         ))}
@@ -166,15 +170,15 @@ export default function Setup() {
   };
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Setup</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Setup</h2>
         <p className="text-sm text-gray-500 mt-1">Configure your ATS settings and dropdown menus</p>
       </div>
 
       <div className="card">
         <h3 className="font-semibold text-gray-800 mb-4">Global Settings</h3>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {[
             { key: 'business_name', label: 'Business / Team Name', type: 'text' },
             { key: 'currency', label: 'Currency', type: 'text' },
@@ -192,11 +196,11 @@ export default function Setup() {
           <button className="btn-primary" onClick={save} disabled={saving}>
             {saving ? 'Saving…' : 'Save Settings'}
           </button>
-          {saved && <span className="text-sm text-emerald-600">Saved!</span>}
+          {saved && <span className="text-sm text-emerald-600 font-medium">Saved!</span>}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         <SimpleList endpoint="departments" label="Departments" />
         <SimpleList endpoint="locations" label="Locations" />
         <SimpleList endpoint="role_types" label="Role Types" />

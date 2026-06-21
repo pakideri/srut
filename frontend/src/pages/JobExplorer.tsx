@@ -40,41 +40,42 @@ export default function JobExplorer() {
   const ind = data ? timeToHireIndicator(data.job.target_hire_date) : null;
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Job Explorer</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Job Explorer</h2>
         <p className="text-sm text-gray-500 mt-1">Analyze funnel, sources, and metrics for a specific role</p>
       </div>
 
       <div>
         <label className="label">Select Job Opening</label>
-        <select className="select max-w-sm" value={selectedId ?? ''} onChange={e => setSelectedId(parseInt(e.target.value))}>
+        <select className="select w-full sm:max-w-sm" value={selectedId ?? ''} onChange={e => setSelectedId(parseInt(e.target.value))}>
           <option value="">— Choose a role —</option>
-          {jobs.map(j => <option key={j.id} value={j.id}>{j.title} — {j.department ?? 'N/A'}</option>)}
+          {jobs.map(j => <option key={j.id} value={j.id}>{j.title}{j.department ? ` — ${j.department}` : ''}</option>)}
         </select>
       </div>
 
       {loading && <div className="text-gray-400 text-sm">Loading…</div>}
 
       {data && !loading && (
-        <div className="space-y-6">
+        <div className="space-y-5">
+          {/* Job details card */}
           <div className="card">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div>
-                <h3 className="text-xl font-bold text-gray-900">{data.job.title}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900">{data.job.title}</h3>
                 <p className="text-sm text-gray-500 mt-1">
                   {[data.job.department, data.job.location, data.job.job_type].filter(Boolean).join(' · ')}
                 </p>
               </div>
-              <div className="text-right space-y-1">
-                <span className="badge bg-blue-100 text-blue-700 text-sm">{data.job.status}</span>
-                {ind && <div><span className={`badge ${ind.cls}`}>{ind.label}</span></div>}
+              <div className="flex flex-wrap items-center gap-2 sm:flex-col sm:items-end">
+                <span className="badge bg-blue-100 text-blue-700">{data.job.status}</span>
+                {ind && <span className={`badge ${ind.cls}`}>{ind.label}</span>}
                 {data.avgScore !== null && (
                   <p className="text-xs text-gray-500">Avg score: <strong>{data.avgScore}/5</strong></p>
                 )}
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
               <div>
                 <p className="text-xs text-gray-400">Manager</p>
                 <p className="text-sm font-medium">{data.job.manager ?? '—'}</p>
@@ -83,7 +84,7 @@ export default function JobExplorer() {
                 <p className="text-xs text-gray-400">Recruiter</p>
                 <p className="text-sm font-medium">{data.job.recruiter ?? '—'}</p>
               </div>
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <p className="text-xs text-gray-400">Budget</p>
                 <p className="text-sm font-medium">
                   {data.job.budget ? `${data.job.currency ?? 'USD'} ${data.job.budget.toLocaleString()}` : '—'}
@@ -92,15 +93,15 @@ export default function JobExplorer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
             <div className="card">
-              <h3 className="font-semibold text-gray-800 mb-4">Hiring Funnel</h3>
+              <h3 className="font-semibold text-gray-800 mb-4 text-sm sm:text-base">Hiring Funnel</h3>
               {data.funnel.length === 0 ? (
                 <p className="text-sm text-gray-400">No candidates in pipeline.</p>
               ) : (
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={data.funnel} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                    <XAxis dataKey="stage" tick={{ fontSize: 10 }} />
+                    <XAxis dataKey="stage" tick={{ fontSize: 10 }} interval={0} angle={-20} textAnchor="end" height={45} />
                     <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                     <Tooltip />
                     <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
@@ -110,40 +111,43 @@ export default function JobExplorer() {
             </div>
 
             <div className="card">
-              <h3 className="font-semibold text-gray-800 mb-4">Candidates by Source</h3>
+              <h3 className="font-semibold text-gray-800 mb-4 text-sm sm:text-base">Candidates by Source</h3>
               {data.sources.length === 0 ? (
                 <p className="text-sm text-gray-400">No source data.</p>
               ) : (
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
-                    <Pie data={data.sources} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={70} label>
+                    <Pie data={data.sources} dataKey="count" nameKey="source" cx="50%" cy="50%" outerRadius={60}>
                       {data.sources.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Legend />
+                    <Legend wrapperStyle={{ fontSize: 11 }} />
                     <Tooltip />
                   </PieChart>
                 </ResponsiveContainer>
               )}
             </div>
 
-            <div className="card">
-              <h3 className="font-semibold text-gray-800 mb-4">Outcomes</h3>
+            <div className="card xl:col-span-2">
+              <h3 className="font-semibold text-gray-800 mb-4 text-sm sm:text-base">Outcomes</h3>
               {data.outcomes.length === 0 ? (
                 <p className="text-sm text-gray-400">No outcome data.</p>
               ) : (
-                <div className="space-y-2">
-                  {data.outcomes.map(o => (
-                    <div key={o.status} className="flex items-center gap-3">
-                      <span className="text-sm w-24 text-gray-600">{o.status}</span>
-                      <div className="flex-1 bg-gray-100 rounded-full h-2">
-                        <div
-                          className="bg-blue-500 h-2 rounded-full"
-                          style={{ width: `${(o.count / data.outcomes.reduce((s, x) => s + x.count, 0)) * 100}%` }}
-                        />
+                <div className="space-y-2 max-w-md">
+                  {data.outcomes.map(o => {
+                    const total = data.outcomes.reduce((s, x) => s + x.count, 0);
+                    return (
+                      <div key={o.status} className="flex items-center gap-3">
+                        <span className="text-sm w-20 flex-shrink-0 text-gray-600">{o.status}</span>
+                        <div className="flex-1 bg-gray-100 rounded-full h-2">
+                          <div
+                            className="bg-blue-500 h-2 rounded-full transition-all"
+                            style={{ width: `${(o.count / total) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium w-5 text-right flex-shrink-0">{o.count}</span>
                       </div>
-                      <span className="text-sm font-medium w-6 text-right">{o.count}</span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

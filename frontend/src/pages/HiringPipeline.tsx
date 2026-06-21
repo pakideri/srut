@@ -15,12 +15,12 @@ function statusColor(status: string) {
 function CandidateCard({ assessment }: { assessment: Assessment }) {
   return (
     <div className={`rounded-lg border p-3 text-sm ${statusColor(assessment.status)}`}>
-      <p className="font-medium text-gray-800">{assessment.first_name} {assessment.last_name}</p>
-      <p className="text-xs text-gray-500 mt-0.5">{assessment.job_title ?? '—'}</p>
-      {assessment.score && (
+      <p className="font-medium text-gray-800 truncate">{assessment.first_name} {assessment.last_name}</p>
+      <p className="text-xs text-gray-500 mt-0.5 truncate">{assessment.job_title ?? '—'}</p>
+      {assessment.score != null && (
         <div className="flex gap-0.5 mt-1.5">
-          {[1,2,3,4,5].map(n => (
-            <div key={n} className={`w-2.5 h-2.5 rounded-full ${assessment.score! >= n ? 'bg-blue-500' : 'bg-gray-200'}`} />
+          {[1, 2, 3, 4, 5].map(n => (
+            <div key={n} className={`w-2 h-2 rounded-full ${assessment.score! >= n ? 'bg-blue-500' : 'bg-gray-200'}`} />
           ))}
         </div>
       )}
@@ -46,23 +46,30 @@ export default function HiringPipeline() {
   const unassigned = assessments.filter(a => !a.current_stage);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-5">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Hiring Pipeline</h2>
-        <p className="text-sm text-gray-500 mt-1">Kanban view — {assessments.length} candidates across {stages.length} stages</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Hiring Pipeline</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          {assessments.length} candidates · {stages.length} stages
+        </p>
       </div>
 
-      <div className="overflow-x-auto pb-4">
-        <div className="flex gap-4 min-w-max">
+      {/* Kanban — horizontal scroll on mobile/tablet */}
+      <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:mx-0">
+        <div className="flex gap-3 sm:gap-4 px-4 sm:px-6 lg:px-0 pb-4 min-w-max">
           {stages.map(stage => {
             const cards = byStage(stage.name);
             return (
-              <div key={stage.id} className="w-56 flex-shrink-0">
+              <div key={stage.id} className="w-44 sm:w-52 flex-shrink-0">
                 <div className="flex items-center justify-between mb-2 px-1">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{stage.name}</h3>
-                  <span className="text-xs bg-gray-200 text-gray-600 rounded-full px-2 py-0.5">{cards.length}</span>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide truncate">
+                    {stage.name}
+                  </h3>
+                  <span className="text-xs bg-gray-200 text-gray-600 rounded-full px-2 py-0.5 ml-1 flex-shrink-0">
+                    {cards.length}
+                  </span>
                 </div>
-                <div className="bg-gray-100 rounded-xl p-2 space-y-2 min-h-32">
+                <div className="bg-gray-100 rounded-xl p-2 space-y-2 min-h-[6rem]">
                   {cards.length === 0 && (
                     <div className="text-xs text-gray-400 text-center py-4">Empty</div>
                   )}
@@ -73,12 +80,12 @@ export default function HiringPipeline() {
           })}
 
           {unassigned.length > 0 && (
-            <div className="w-56 flex-shrink-0">
+            <div className="w-44 sm:w-52 flex-shrink-0">
               <div className="flex items-center justify-between mb-2 px-1">
                 <h3 className="text-xs font-semibold text-gray-400 uppercase">Unassigned</h3>
-                <span className="text-xs bg-gray-200 text-gray-500 rounded-full px-2 py-0.5">{unassigned.length}</span>
+                <span className="text-xs bg-gray-200 text-gray-500 rounded-full px-2 py-0.5 ml-1">{unassigned.length}</span>
               </div>
-              <div className="bg-gray-100 rounded-xl p-2 space-y-2 min-h-32">
+              <div className="bg-gray-100 rounded-xl p-2 space-y-2 min-h-[6rem]">
                 {unassigned.map(a => <CandidateCard key={a.id} assessment={a} />)}
               </div>
             </div>
@@ -86,14 +93,15 @@ export default function HiringPipeline() {
         </div>
       </div>
 
+      {/* Summary grid — wraps nicely on all screen sizes */}
       <div className="card">
-        <h3 className="font-semibold text-gray-800 mb-3">Stage Summary</h3>
-        <div className="grid grid-cols-4 gap-3">
+        <h3 className="font-semibold text-gray-800 mb-3 text-sm sm:text-base">Stage Summary</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
           {stages.map(s => {
             const count = byStage(s.name).length;
             return (
-              <div key={s.id} className="px-4 py-3 rounded-lg bg-gray-50 border border-gray-100">
-                <p className="text-xs text-gray-500">{s.name}</p>
+              <div key={s.id} className="px-3 py-3 rounded-lg bg-gray-50 border border-gray-100">
+                <p className="text-xs text-gray-500 truncate">{s.name}</p>
                 <p className="text-2xl font-bold text-gray-900 mt-1">{count}</p>
               </div>
             );
