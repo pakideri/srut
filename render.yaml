@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: srut-ats
+    env: node
+    plan: free          # upgrade to starter for persistent disk
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/ats.db
+
+    # Persistent disk keeps SQLite data across redeploys.
+    # Requires at least the Starter plan ($7/mo).
+    # Remove this block if you are on the free plan (data resets on each deploy).
+    disk:
+      name: srut-data
+      mountPath: /data
+      sizeGB: 1
