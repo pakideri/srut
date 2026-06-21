@@ -30,7 +30,7 @@ export default function Sidebar({ open, onClose }: Props) {
     >
       <div className="flex items-center justify-between px-5 py-5 border-b border-gray-700">
         <div>
-          <h1 className="text-lg font-bold tracking-tight">SRUT ATS</h1>
+          <h1 className="text-lg font-bold tracking-tight">HR Tracker</h1>
           <p className="text-xs text-gray-400 mt-0.5">Hiring Intelligence</p>
         </div>
         <button
@@ -64,7 +64,7 @@ export default function Sidebar({ open, onClose }: Props) {
       </nav>
 
       <div className="px-4 py-4 border-t border-gray-700 text-xs text-gray-500">
-        © 2024 SRUT
+        © 2024 HR Tracker
       </div>
     </aside>
   );

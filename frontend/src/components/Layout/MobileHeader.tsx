@@ -24,7 +24,7 @@ export default function MobileHeader({ onMenuClick }: { onMenuClick: () => void 
         <Menu size={20} />
       </button>
       <div>
-        <p className="font-bold text-sm leading-tight">SRUT ATS</p>
+        <p className="font-bold text-sm leading-tight">HR Tracker</p>
         <p className="text-xs text-gray-400 leading-tight">{TITLES[pathname] ?? 'Hiring Intelligence'}</p>
       </div>
     </header>
