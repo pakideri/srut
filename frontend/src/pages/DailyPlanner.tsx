@@ -38,7 +38,7 @@ interface FormProps {
 
 function ReminderForm({ initial, onSave, onCancel }: FormProps) {
   const [form, setForm] = useState<Partial<Reminder>>(
-    initial ?? { reminder_date: todayStr(), is_done: 0 }
+    { reminder_date: todayStr(), is_done: 0, ...initial }
   );
   const set = (k: keyof Reminder, v: string | number) => setForm(f => ({ ...f, [k]: v }));
 
