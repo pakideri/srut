@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Layout/Sidebar';
 import MobileHeader from './components/Layout/MobileHeader';
 import Dashboard from './pages/Dashboard';
@@ -10,41 +10,68 @@ import AssessmentTracker from './pages/AssessmentTracker';
 import HiringPipeline from './pages/HiringPipeline';
 import JobExplorer from './pages/JobExplorer';
 import ApplicantLookup from './pages/ApplicantLookup';
+import DailyPlanner from './pages/DailyPlanner';
+import Login from './pages/Login';
 
-export default function App() {
+function isAuthed() {
+  return localStorage.getItem('hr_auth') === 'true';
+}
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  if (!isAuthed()) return <Navigate to="/login" state={{ from: location }} replace />;
+  return <>{children}</>;
+}
+
+function AppShell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <BrowserRouter>
-      <div className="flex min-h-screen bg-gray-50">
-        {/* Sidebar */}
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        {/* Mobile overlay backdrop */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-        {/* Main content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <MobileHeader onMenuClick={() => setSidebarOpen(true)} />
-          <main className="flex-1 overflow-auto">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/setup" element={<Setup />} />
-              <Route path="/jobs" element={<JobOpenings />} />
-              <Route path="/applicants" element={<ApplicantDatabase />} />
-              <Route path="/assessments" element={<AssessmentTracker />} />
-              <Route path="/pipeline" element={<HiringPipeline />} />
-              <Route path="/job-explorer" element={<JobExplorer />} />
-              <Route path="/applicant-lookup" element={<ApplicantLookup />} />
-            </Routes>
-          </main>
-        </div>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <MobileHeader onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-auto">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/setup" element={<Setup />} />
+            <Route path="/jobs" element={<JobOpenings />} />
+            <Route path="/applicants" element={<ApplicantDatabase />} />
+            <Route path="/assessments" element={<AssessmentTracker />} />
+            <Route path="/pipeline" element={<HiringPipeline />} />
+            <Route path="/job-explorer" element={<JobExplorer />} />
+            <Route path="/applicant-lookup" element={<ApplicantLookup />} />
+            <Route path="/planner" element={<DailyPlanner />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
       </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <AppShell />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }

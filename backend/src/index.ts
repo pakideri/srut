@@ -9,6 +9,7 @@ import jobsRouter from './routes/jobs';
 import applicantsRouter from './routes/applicants';
 import assessmentsRouter from './routes/assessments';
 import analyticsRouter from './routes/analytics';
+import remindersRouter from './routes/reminders';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -25,6 +26,7 @@ app.use('/api/jobs', jobsRouter);
 app.use('/api/applicants', applicantsRouter);
 app.use('/api/assessments', assessmentsRouter);
 app.use('/api/analytics', analyticsRouter);
+app.use('/api/reminders', remindersRouter);
 
 // Serve the built React app in production (backend/dist/ → ../../frontend/dist)
 if (isProd) {

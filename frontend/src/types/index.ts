@@ -70,6 +70,16 @@ export interface Assessment {
   job_status?: string;
 }
 
+export interface Reminder {
+  id: number;
+  title: string;
+  reminder_date: string;
+  reminder_time?: string;
+  reason?: string;
+  is_done: number;
+  created_at: string;
+}
+
 export interface DashboardData {
   totalJobs: number;
   totalCandidates: number;

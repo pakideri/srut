@@ -1,5 +1,8 @@
-import { NavLink } from 'react-router-dom';
-import { X, LayoutDashboard, Settings, Briefcase, Users, ClipboardList, Search, UserSearch, KanbanSquare } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import {
+  X, LayoutDashboard, Settings, Briefcase, Users, ClipboardList,
+  Search, UserSearch, KanbanSquare, CalendarClock, LogOut,
+} from 'lucide-react';
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -10,6 +13,7 @@ const NAV = [
   { to: '/pipeline', icon: KanbanSquare, label: 'Hiring Pipeline' },
   { to: '/job-explorer', icon: Search, label: 'Job Explorer' },
   { to: '/applicant-lookup', icon: UserSearch, label: 'Applicant Lookup' },
+  { to: '/planner', icon: CalendarClock, label: 'Daily Planner' },
 ];
 
 interface Props {
@@ -18,6 +22,13 @@ interface Props {
 }
 
 export default function Sidebar({ open, onClose }: Props) {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('hr_auth');
+    navigate('/login', { replace: true });
+  };
+
   return (
     <aside
       className={`
@@ -63,8 +74,15 @@ export default function Sidebar({ open, onClose }: Props) {
         ))}
       </nav>
 
-      <div className="px-4 py-4 border-t border-blue-200 text-xs text-blue-400">
-        © 2024 HR Tracker
+      <div className="px-2 py-3 border-t border-blue-200 space-y-1">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+        >
+          <LogOut size={17} />
+          Sign out
+        </button>
+        <p className="text-xs text-blue-400 text-center pb-1">© 2024 HR Tracker</p>
       </div>
     </aside>
   );

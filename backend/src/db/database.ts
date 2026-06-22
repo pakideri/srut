@@ -104,6 +104,16 @@ export function initDb() {
       updated_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (job_id) REFERENCES jobs(id)
     );
+
+    CREATE TABLE IF NOT EXISTS reminders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      reminder_date TEXT NOT NULL,
+      reminder_time TEXT,
+      reason TEXT,
+      is_done INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 
   seedDefaults();

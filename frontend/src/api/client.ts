@@ -42,6 +42,12 @@ export const api = {
   updateAssessment: (id: number, data: object) => req<{ ok: boolean; next_action: string }>(`/assessments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteAssessment: (id: number) => req(`/assessments/${id}`, { method: 'DELETE' }),
 
+  // Reminders / Daily Planner
+  getReminders: () => req<import('../types').Reminder[]>('/reminders'),
+  createReminder: (data: object) => req<{ id: number }>('/reminders', { method: 'POST', body: JSON.stringify(data) }),
+  updateReminder: (id: number, data: object) => req(`/reminders/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteReminder: (id: number) => req(`/reminders/${id}`, { method: 'DELETE' }),
+
   // Analytics
   getDashboard: () => req<import('../types').DashboardData>('/analytics/dashboard'),
   getJobAnalytics: (id: number) => req<unknown>(`/analytics/job/${id}`),
