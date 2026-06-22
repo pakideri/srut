@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { api } from '../api/client';
 import type { Reminder } from '../types';
 import { Plus, Pencil, Trash2, Calendar, Clock, Bell, CheckCircle2, Circle, X } from 'lucide-react';
@@ -18,6 +18,27 @@ function formatTime(t?: string) {
   const [h, m] = t.split(':').map(Number);
   const ampm = h >= 12 ? 'PM' : 'AM';
   return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+function playTone(kind?: string) {
+  try {
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    const ctx = new AudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.value = kind === 'interview' ? 880 : 440;
+    o.connect(g);
+    g.connect(ctx.destination);
+    const now = ctx.currentTime;
+    o.start(now);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.5, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+    o.stop(now + 1);
+  } catch (err) {
+    console.warn('Audio not available', err);
+  }
 }
 
 function cardStyle(r: Reminder): { border: string; badge: string; label: string } {
@@ -73,6 +94,30 @@ function ReminderForm({ initial, onSave, onCancel }: FormProps) {
               placeholder="What is this reminder about?"
               value={form.reason ?? ''} onChange={e => set('reason', e.target.value)} />
           </div>
+          <div>
+            <label className="label">Type</label>
+            <select className="input" value={form.reminder_type ?? 'other'} onChange={e => set('reminder_type', e.target.value)}>
+              <option value="other">General</option>
+              <option value="interview">Interview</option>
+            </select>
+          </div>
+
+          {form.reminder_type === 'interview' && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="label">Candidate name</label>
+                <input className="input" value={form.candidate_name ?? ''} onChange={e => set('candidate_name', e.target.value)} />
+              </div>
+              <div>
+                <label className="label">Job role</label>
+                <input className="input" value={form.job_role ?? ''} onChange={e => set('job_role', e.target.value)} />
+              </div>
+              <div>
+                <label className="label">Interviewer</label>
+                <input className="input" value={form.interviewer ?? ''} onChange={e => set('interviewer', e.target.value)} />
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex gap-2 pt-4">
           <button className="btn-primary" onClick={() => form.title && form.reminder_date && onSave(form)}>
@@ -129,6 +174,13 @@ function ReminderCard({ reminder, onEdit, onDelete, onToggleDone }: CardProps) {
                 </span>
               )}
             </div>
+            {reminder.reminder_type === 'interview' && (
+              <div className="text-sm text-gray-700 mb-2">
+                {reminder.candidate_name && <div><strong>Candidate:</strong> {reminder.candidate_name}</div>}
+                {reminder.job_role && <div><strong>Role:</strong> {reminder.job_role}</div>}
+                {reminder.interviewer && <div><strong>Interviewer:</strong> {reminder.interviewer}</div>}
+              </div>
+            )}
 
             {reminder.reason && (
               <div className="flex items-start gap-1.5 mt-2">
@@ -164,6 +216,38 @@ export default function DailyPlanner() {
 
   const load = () => api.getReminders().then(setReminders).finally(() => setLoading(false));
   useEffect(() => { load(); }, []);
+
+  const timersRef = useRef<number[]>([]);
+
+  // Schedule 5-minute-before alerts for reminders when logged in
+  useEffect(() => {
+    // clear existing
+    timersRef.current.forEach(id => clearTimeout(id));
+    timersRef.current = [];
+    if (localStorage.getItem('hr_auth') !== 'true') return;
+
+    reminders.forEach(r => {
+      if (r.is_done) return;
+      if (!r.reminder_time) return;
+      const dt = new Date(`${r.reminder_date}T${r.reminder_time}`);
+      const notifyAt = dt.getTime() - 5 * 60 * 1000;
+      const now = Date.now();
+      if (notifyAt <= now && dt.getTime() > now) {
+        // Within the 5-minute window -> play immediately
+        window.setTimeout(() => playTone(r.reminder_type), 100);
+        return;
+      }
+      if (notifyAt > now) {
+        const id = window.setTimeout(() => playTone(r.reminder_type), notifyAt - now);
+        timersRef.current.push(id as unknown as number);
+      }
+    });
+
+    return () => {
+      timersRef.current.forEach(id => clearTimeout(id));
+      timersRef.current = [];
+    };
+  }, [reminders]);
 
   const handleSave = async (data: Partial<Reminder>) => {
     if (data.id) await api.updateReminder(data.id, data);

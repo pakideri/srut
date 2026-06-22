@@ -116,6 +116,19 @@ export function initDb() {
     );
   `);
 
+  // Ensure newer reminder columns exist (safe to run on existing DB)
+  try {
+    const cols = db.prepare("PRAGMA table_info(reminders)").all() as { name: string }[];
+    const names = cols.map(c => c.name);
+    if (!names.includes('candidate_name')) db.exec("ALTER TABLE reminders ADD COLUMN candidate_name TEXT;");
+    if (!names.includes('job_role')) db.exec("ALTER TABLE reminders ADD COLUMN job_role TEXT;");
+    if (!names.includes('interviewer')) db.exec("ALTER TABLE reminders ADD COLUMN interviewer TEXT;");
+    if (!names.includes('reminder_type')) db.exec("ALTER TABLE reminders ADD COLUMN reminder_type TEXT DEFAULT 'other';");
+  } catch (err) {
+    // non-fatal; older SQLite or permission issues should not block server startup
+    console.warn('Could not ensure reminder columns:', err);
+  }
+
   seedDefaults();
 }
 

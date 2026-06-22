@@ -75,6 +75,10 @@ export interface Reminder {
   title: string;
   reminder_date: string;
   reminder_time?: string;
+  candidate_name?: string;
+  job_role?: string;
+  interviewer?: string;
+  reminder_type?: string;
   reason?: string;
   is_done: number;
   created_at: string;
